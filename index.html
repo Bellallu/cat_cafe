@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cozy Cat Café ☕🐱</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream:      #FFF8F0;
+      --peach:      #FFCBA4;
+      --apricot:    #FFB347;
+      --caramel:    #E8956D;
+      --warm-white: #FFFAF5;
+      --text:       #5C3D2E;
+      --text-light: #9B6B5A;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── FLOATING PAWS BG ── */
+    .paw-bg {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .paw {
+      position: absolute; opacity: 0;
+      animation: floatPaw linear infinite;
+    }
+    @keyframes floatPaw {
+      0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0; }
+      10%  { opacity: 0.16; }
+      90%  { opacity: 0.10; }
+      100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,248,240,0.93);
+      backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.9rem 2.5rem;
+      border-bottom: 2px solid var(--peach);
+      box-shadow: 0 2px 20px rgba(196,124,90,0.1);
+    }
+    .nav-logo {
+      font-family: 'Pacifico', cursive;
+      font-size: 1.6rem; color: var(--caramel); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--text);
+      font-weight: 700; font-size: 0.95rem; transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--caramel); }
+    .nav-cat { font-size: 1.4rem; animation: wink 3.5s infinite; }
+    @keyframes wink { 0%,88%,100%{opacity:1} 93%{opacity:0} }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 5rem 1.5rem 3rem;
+      background: radial-gradient(ellipse at 50% 0%, #FFE8D6 0%, #FFF8F0 70%);
+      overflow: hidden;
+    }
+    .hero-title {
+      font-family: 'Pacifico', cursive;
+      font-size: clamp(2.4rem, 8vw, 5.2rem);
+      color: var(--caramel);
+      text-shadow: 3px 3px 0 rgba(196,124,90,0.15);
+      line-height: 1.2; margin-bottom: 1rem;
+      animation: titlePop 0.8s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes titlePop {
+      0%   { transform: scale(0.6) rotate(-4deg); opacity: 0; }
+      80%  { transform: scale(1.04) rotate(1deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--text-light); max-width: 540px;
+      margin: 0 auto 2.5rem;
+      animation: fadeUp 0.9s 0.3s both;
+    }
+    @keyframes fadeUp {
+      from { transform: translateY(28px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .hero-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--apricot), var(--caramel));
+      color: #fff; font-family: 'Nunito', sans-serif; font-weight: 800;
+      font-size: 1.1rem; padding: 0.85rem 2.5rem; border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(200,120,80,0.35);
+      transition: transform 0.25s, box-shadow 0.25s;
+      animation: fadeUp 0.9s 0.5s both;
+    }
+    .hero-btn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 10px 28px rgba(200,120,80,0.45); }
+    .hero-cat-row {
+      display: flex; gap: 2rem; margin-top: 3.5rem;
+      flex-wrap: wrap; justify-content: center;
+      animation: fadeUp 1s 0.7s both;
+    }
+    .big-side-cat {
+      position: absolute; top: 44%;
+      animation: sideBounce 3s ease-in-out infinite;
+    }
+    .big-side-cat.left  { left: 3%; }
+    .big-side-cat.right { right: 3%; animation-delay: 0.4s; }
+    @keyframes sideBounce {
+      0%,100% { transform: translateY(0) rotate(-2deg); }
+      50%     { transform: translateY(-16px) rotate(2deg); }
+    }
+    @media (max-width: 700px) { .big-side-cat { display: none; } }
+
+    /* ════════════════════════════════════
+       CAT COMPONENT
+       All measurements based on a 90×80 head
+    ════════════════════════════════════ */
+    .cat-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      cursor: pointer; user-select: none;
+    }
+    .cat-wrap:hover .cat-head,
+    .cat-wrap:hover .cat-torso { transform: translateY(-5px); }
+    .cat-head {
+      width: 90px; height: 80px;
+      border-radius: 50% 50% 45% 45%;
+      position: relative;
+      transition: transform 0.3s;
+      box-shadow: inset -4px -6px 10px rgba(0,0,0,0.07);
+    }
+
+    /* ── ears ── */
+    .ear {
+      position: absolute; top: -22px;
+      width: 0; height: 0;
+      border-left: 17px solid transparent;
+      border-right: 17px solid transparent;
+      border-bottom-width: 28px;
+      border-bottom-style: solid;
+    }
+    .ear::after {
+      content: '';
+      position: absolute; top: 7px; left: -9px;
+      width: 0; height: 0;
+      border-left: 9px solid transparent;
+      border-right: 9px solid transparent;
+      border-bottom: 17px solid #FFB8C6;
+    }
+    .ear-l { left: 7px;  transform: rotate(-10deg); }
+    .ear-r { right: 7px; transform: rotate(10deg);  }
+
+    /* ── eyes (absolute in head) ── */
+    .eye {
+      position: absolute;
+      top: 26px;
+      width: 15px; height: 15px;
+      border-radius: 50%;
+      background: #3A2A1A;
+      animation: blink 4s ease-in-out infinite;
+      overflow: hidden;
+    }
+    .eye-l { left: 18px; }
+    .eye-r { right: 18px; }
+    .eye::before {          /* shine */
+      content: '';
+      position: absolute; top: 3px; left: 3px;
+      width: 5px; height: 5px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 50%;
+    }
+    .eye::after {           /* pupil slit */
+      content: '';
+      position: absolute; top: 3px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 9px;
+      background: rgba(0,0,0,0.35);
+      border-radius: 2px;
+    }
+    @keyframes blink {
+      0%,44%,52%,100% { transform: scaleY(1); }
+      47%,49%         { transform: scaleY(0.07); }
+    }
+
+    /* ── nose ── */
+    .cat-nose {
+      position: absolute;
+      top: 46px; left: 50%; transform: translateX(-50%);
+      width: 9px; height: 7px;
+      background: #E8896A;
+      border-radius: 50% 50% 40% 40%;
+    }
+
+    /* ── mouth ── */
+    .cat-mouth-l, .cat-mouth-r {
+      position: absolute;
+      top: 52px;
+      width: 11px; height: 7px;
+      border: 2px solid;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+    }
+    .cat-mouth-l { left:  calc(50% - 11px); border-right: none; border-color: rgba(150,80,60,0.6); }
+    .cat-mouth-r { right: calc(50% - 11px); border-left:  none; border-color: rgba(150,80,60,0.6); }
+
+    /* ── whiskers ── */
+    .w { position: absolute; height: 1.5px; border-radius: 1px; background: rgba(100,65,45,0.45); }
+    /* left side */
+    .wl1 { width: 30px; top: 40px; right: calc(50% + 5px); transform-origin: right center; animation: wWiggle 2.5s ease-in-out infinite 0.0s; }
+    .wl2 { width: 26px; top: 47px; right: calc(50% + 5px); transform-origin: right center; animation: wWiggle 2.5s ease-in-out infinite 0.15s; }
+    .wl3 { width: 24px; top: 54px; right: calc(50% + 5px); transform-origin: right center; animation: wWiggle 2.5s ease-in-out infinite 0.3s; }
+    /* right side */
+    .wr1 { width: 30px; top: 40px; left: calc(50% + 5px); transform-origin: left  center; animation: wWiggle 2.5s ease-in-out infinite 0.1s; }
+    .wr2 { width: 26px; top: 47px; left: calc(50% + 5px); transform-origin: left  center; animation: wWiggle 2.5s ease-in-out infinite 0.25s; }
+    .wr3 { width: 24px; top: 54px; left: calc(50% + 5px); transform-origin: left  center; animation: wWiggle 2.5s ease-in-out infinite 0.4s; }
+    @keyframes wWiggle {
+      0%,100% { transform: rotate(0deg); }
+      40%     { transform: rotate(5deg); }
+      70%     { transform: rotate(-3deg); }
+    }
+
+    /* ── torso ── */
+    .cat-torso {
+      width: 80px; height: 68px;
+      border-radius: 40% 40% 48% 48%;
+      margin: -8px auto 0;
+      position: relative;
+      transition: transform 0.3s;
+    }
+
+    /* ── SVG TAIL ── */
+    .tail-svg {
+      position: absolute;
+      bottom: 0; right: -46px;
+      overflow: visible;
+      animation: tailSwing 1.3s ease-in-out infinite;
+      transform-origin: 8px 88px; /* base of the curve */
+    }
+    @keyframes tailSwing {
+      0%   { transform: rotate(-18deg); }
+      50%  { transform: rotate(22deg);  }
+      100% { transform: rotate(-18deg); }
+    }
+    /* alternate speed/phase for variety */
+    .tail-slow  { animation-duration: 1.9s; }
+    .tail-fast  { animation-duration: 0.9s; }
+    .tail-late  { animation-delay: -0.6s; }
+    .tail-late2 { animation-delay: -1.1s; }
+
+    /* ── paws ── */
+    .cat-paws { display: flex; justify-content: center; gap: 10px; margin-top: 3px; }
+    .paw-pad {
+      width: 22px; height: 14px;
+      border-radius: 50% 50% 40% 40%;
+    }
+    .paw-pad:nth-child(1) { animation: pawL 2.2s ease-in-out infinite; }
+    .paw-pad:nth-child(2) { animation: pawR 2.2s ease-in-out infinite 0.4s; }
+    @keyframes pawL { 0%,100%{transform:rotate(0deg)} 40%{transform:rotate(-12deg)} }
+    @keyframes pawR { 0%,100%{transform:rotate(0deg)} 40%{transform:rotate( 12deg)} }
+
+    /* ── cat name label ── */
+    .cat-name {
+      font-size: 0.85rem; font-weight: 700;
+      color: var(--text-light); margin-top: 0.6rem;
+    }
+
+    /* ── colour themes ── */
+    /* orange */
+    .c-orange .cat-head, .c-orange .cat-torso, .c-orange .paw-pad { background: #F4A460; }
+    .c-orange .ear  { border-bottom-color: #F4A460; }
+    .c-orange .tail-path { stroke: #E8905A; }
+    /* gray */
+    .c-gray .cat-head, .c-gray .cat-torso, .c-gray .paw-pad { background: #C0B8B8; }
+    .c-gray .ear    { border-bottom-color: #C0B8B8; }
+    .c-gray .tail-path { stroke: #A8A0A0; }
+    .c-gray .w      { background: rgba(80,60,60,0.38); }
+    /* cream */
+    .c-cream .cat-head, .c-cream .cat-torso, .c-cream .paw-pad { background: #F0D9A8; }
+    .c-cream .ear   { border-bottom-color: #F0D9A8; }
+    .c-cream .tail-path { stroke: #D8BA80; }
+    .c-cream .eye   { background: #2A5A3A; }
+    .c-cream .cat-nose  { background: #D88890; }
+    /* black */
+    .c-black .cat-head, .c-black .cat-torso, .c-black .paw-pad { background: #38303E; }
+    .c-black .ear   { border-bottom-color: #38303E; }
+    .c-black .ear::after { border-bottom-color: #7A5068; }
+    .c-black .tail-path { stroke: #28202C; }
+    .c-black .eye   { background: #58C888; box-shadow: 0 0 6px #58C888; }
+    .c-black .cat-nose  { background: #B06080; }
+    .c-black .w     { background: rgba(200,180,200,0.45); }
+    /* pink */
+    .c-pink .cat-head, .c-pink .cat-torso, .c-pink .paw-pad { background: #F4B8CE; }
+    .c-pink .ear    { border-bottom-color: #F4B8CE; }
+    .c-pink .tail-path { stroke: #D898B0; }
+    .c-pink .eye    { background: #8050B8; }
+    .c-pink .cat-nose   { background: #D07090; }
+    /* toffee */
+    .c-toffee .cat-head, .c-toffee .cat-torso, .c-toffee .paw-pad { background: #C8854A; }
+    .c-toffee .ear  { border-bottom-color: #C8854A; }
+    .c-toffee .tail-path { stroke: #A86830; }
+    .c-toffee .cat-nose { background: #A05840; }
+    .c-toffee .w    { background: rgba(80,50,30,0.45); }
+
+    /* ── big variants for hero sides ── */
+    .cat-lg .cat-head { width: 110px; height: 96px; }
+    .cat-lg .cat-torso{ width: 98px;  height: 82px; }
+    .cat-lg .eye      { width: 18px;  height: 18px; top: 30px; }
+    .cat-lg .eye-l    { left: 22px; }
+    .cat-lg .eye-r    { right: 22px; }
+    .cat-lg .cat-nose { top: 56px; width: 11px; height: 9px; }
+    .cat-lg .cat-mouth-l { top: 64px; }
+    .cat-lg .cat-mouth-r { top: 64px; }
+    .cat-lg .wl1,.cat-lg .wl2,.cat-lg .wl3,
+    .cat-lg .wr1,.cat-lg .wr2,.cat-lg .wr3 { top-offset: 8px; }
+    .cat-lg .tail-svg { right: -56px; }
+    .cat-lg .paw-pad  { width: 28px; height: 18px; }
+
+    /* ── small variants for gallery ── */
+    .cat-sm { transform: scale(0.85); transform-origin: top center; }
+
+    /* ═══════════════════════════════════
+       SECTIONS
+    ═══════════════════════════════════ */
+    section { position: relative; z-index: 1; padding: 5rem 1.5rem; }
+    .section-title {
+      font-family: 'Pacifico', cursive;
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      color: var(--caramel); text-align: center; margin-bottom: 0.4rem;
+    }
+    .section-sub {
+      text-align: center; color: var(--text-light);
+      font-size: 1rem; margin-bottom: 3rem;
+    }
+
+    /* ── WALK STRIP ── */
+    .walk-strip {
+      background: linear-gradient(180deg, #FFE8D0 0%, #FFF0E4 100%);
+      padding: 2rem 0; position: relative; z-index: 1; overflow: hidden;
+    }
+    .walk-strip h3 {
+      font-family: 'Pacifico', cursive; font-size: 1.5rem;
+      color: var(--caramel); text-align: center; margin-bottom: 1.5rem;
+    }
+    .walk-track { position: relative; height: 150px; overflow: hidden; }
+    .walker {
+      position: absolute; bottom: 16px;
+      animation: walkAcross linear infinite;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    @keyframes walkAcross {
+      from { left: -160px; }
+      to   { left: 110%; }
+    }
+    /* mini cat for walking */
+    .wcat-head {
+      width: 58px; height: 50px;
+      border-radius: 50% 50% 42% 42%;
+      position: relative;
+    }
+    .wcat-ear {
+      position: absolute; top: -14px;
+      width: 0; height: 0;
+      border-left: 11px solid transparent;
+      border-right: 11px solid transparent;
+      border-bottom-width: 18px; border-bottom-style: solid;
+    }
+    .wcat-ear::after {
+      content: '';
+      position: absolute; top: 4px; left: -6px;
+      width: 0; height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 11px solid #FFB8C6;
+    }
+    .wcat-ear-l { left: 5px;  transform: rotate(-8deg); }
+    .wcat-ear-r { right: 5px; transform: rotate(8deg); }
+    .weye {
+      position: absolute; top: 16px;
+      width: 9px; height: 9px;
+      border-radius: 50%; background: #3A2A1A;
+      animation: blink 4s ease-in-out infinite;
+    }
+    .weye::before { content:''; position:absolute; top:2px;left:2px; width:3px;height:3px; background:#fff; border-radius:50%; }
+    .weye.wl { left: 12px; }
+    .weye.wr { right: 12px; }
+    .wcat-body {
+      width: 68px; height: 38px;
+      border-radius: 30%; margin-top: -6px;
+      position: relative;
+    }
+    .w-tail-svg {
+      position: absolute; right: -28px; bottom: 2px;
+      overflow: visible;
+      animation: tailSwing 1.1s ease-in-out infinite;
+      transform-origin: 5px 52px;
+    }
+    .wlegs { display: flex; gap: 5px; margin-top: 2px; }
+    .wleg {
+      width: 9px; height: 18px;
+      border-radius: 0 0 5px 5px;
+    }
+    .wleg:nth-child(1) { animation: legA 0.5s ease-in-out infinite; }
+    .wleg:nth-child(2) { animation: legB 0.5s ease-in-out infinite; }
+    .wleg:nth-child(3) { animation: legA 0.5s ease-in-out infinite 0.1s; }
+    .wleg:nth-child(4) { animation: legB 0.5s ease-in-out infinite 0.1s; }
+    @keyframes legA { 0%,100%{transform:rotate(18deg)} 50%{transform:rotate(-18deg)} }
+    @keyframes legB { 0%,100%{transform:rotate(-18deg)} 50%{transform:rotate(18deg)} }
+
+    /* walk colour helpers */
+    .wc-orange .wcat-head,.wc-orange .wcat-body,.wc-orange .wleg { background:#F4A460; }
+    .wc-orange .wcat-ear { border-bottom-color:#F4A460; }
+    .wc-orange .wtail { stroke:#E08040; }
+    .wc-gray .wcat-head,.wc-gray .wcat-body,.wc-gray .wleg { background:#BFB8B8; }
+    .wc-gray .wcat-ear { border-bottom-color:#BFB8B8; }
+    .wc-gray .wtail { stroke:#A09898; }
+    .wc-cream .wcat-head,.wc-cream .wcat-body,.wc-cream .wleg { background:#EDCF96; }
+    .wc-cream .wcat-ear { border-bottom-color:#EDCF96; }
+    .wc-cream .wtail { stroke:#C8A870; }
+    .wc-cream .weye { background:#2A5A3A; }
+    .wc-black .wcat-head,.wc-black .wcat-body,.wc-black .wleg { background:#38303E; }
+    .wc-black .wcat-ear { border-bottom-color:#38303E; }
+    .wc-black .wtail { stroke:#28202A; }
+    .wc-black .weye { background:#58C888; box-shadow:0 0 4px #58C888; }
+    .wc-pink .wcat-head,.wc-pink .wcat-body,.wc-pink .wleg { background:#F4B8CE; }
+    .wc-pink .wcat-ear { border-bottom-color:#F4B8CE; }
+    .wc-pink .wtail { stroke:#D090A8; }
+    .wc-toffee .wcat-head,.wc-toffee .wcat-body,.wc-toffee .wleg { background:#C8854A; }
+    .wc-toffee .wcat-ear { border-bottom-color:#C8854A; }
+    .wc-toffee .wtail { stroke:#A06030; }
+
+    /* ── GALLERY ── */
+    .gallery { background: linear-gradient(180deg,#FFF8F0,#FFE8D6); }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 1.8rem; max-width: 1100px; margin: 0 auto;
+    }
+    .gallery-card {
+      background: var(--warm-white); border-radius: 24px;
+      padding: 1.8rem 1.5rem 1.4rem;
+      text-align: center;
+      box-shadow: 0 6px 24px rgba(196,124,90,0.09);
+      border: 2px solid rgba(255,203,164,0.4);
+      transition: transform 0.3s, box-shadow 0.3s;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .gallery-card:hover { transform: translateY(-8px) rotate(-1deg); box-shadow: 0 14px 36px rgba(196,124,90,0.18); }
+    .gallery-card h3 { font-family:'Pacifico',cursive; color:var(--caramel); margin:1rem 0 0.4rem; font-size:1.1rem; }
+    .gallery-card p  { font-size:0.88rem; color:var(--text-light); line-height:1.55; }
+
+    /* ── SLEEPING CAT ── */
+    .sleep-wrap { display:flex; flex-direction:column; align-items:center; }
+    .sleep-head {
+      width:78px; height:70px; background:#F4A460;
+      border-radius:50% 50% 40% 40%; position:relative;
+      animation:sleepNod 4s ease-in-out infinite;
+    }
+    @keyframes sleepNod {
+      0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)}
+    }
+    .sleep-ear {
+      position:absolute; top:-16px;
+      width:0; height:0;
+      border-left:13px solid transparent;
+      border-right:13px solid transparent;
+      border-bottom:22px solid #F4A460;
+    }
+    .sleep-ear::after {
+      content:''; position:absolute; top:4px; left:-7px;
+      width:0; height:0;
+      border-left:7px solid transparent;
+      border-right:7px solid transparent;
+      border-bottom:14px solid #FFB8C6;
+    }
+    .sleep-ear-l{left:7px;transform:rotate(-8deg)} .sleep-ear-r{right:7px;transform:rotate(8deg)}
+    .sleep-eyelid {
+      position:absolute; top:26px;
+      width:16px; height:4px; background:#5C3D2E; border-radius:3px;
+    }
+    .sleep-eyelid-l{left:14px} .sleep-eyelid-r{right:14px}
+    .z-bubble {
+      position:absolute; font-size:0.75rem;
+      color:var(--text-light); font-weight:800;
+      animation:zFloat 2s ease-in-out infinite;
+    }
+    .z1{top:-18px;left:52px;animation-delay:0s}
+    .z2{top:-30px;left:62px;font-size:0.6rem;animation-delay:0.6s}
+    .z3{top:-38px;left:70px;font-size:0.5rem;animation-delay:1.2s}
+    @keyframes zFloat {
+      0%,100%{transform:translateY(0) scale(1);opacity:0.8}
+      50%{transform:translateY(-6px) scale(1.15);opacity:0.3}
+    }
+    .sleep-body {
+      width:98px; height:56px; background:#F4A460;
+      border-radius:50%; margin-top:-6px; position:relative;
+    }
+    .sleep-tail-svg {
+      position:absolute; right:-30px; bottom:0; overflow:visible;
+      animation:sleepTailWag 3.5s ease-in-out infinite;
+      transform-origin:5px 48px;
+    }
+    @keyframes sleepTailWag {
+      0%,100%{transform:rotate(-8deg)} 50%{transform:rotate(12deg)}
+    }
+
+    /* ── WINDOWS ── */
+    .windows-section {
+      background: linear-gradient(180deg,#FFE0CC,#FFF8F0);
+    }
+    .windows-row {
+      display:flex; justify-content:center; gap:2rem; flex-wrap:wrap;
+    }
+    .window-item { text-align:center; }
+    .window-frame {
+      background:#DEB87A; border-radius:16px 16px 8px 8px;
+      padding:8px; display:inline-block;
+      box-shadow:0 8px 24px rgba(0,0,0,0.12);
+    }
+    .window-glass {
+      width:140px; height:155px;
+      background:linear-gradient(135deg,#C8DEFF,#E0EEFF,#F4F8FF);
+      border-radius:10px 10px 4px 4px; overflow:hidden; position:relative;
+    }
+    .window-bar-v {
+      position:absolute; top:0; left:50%; transform:translateX(-50%);
+      width:3px; height:100%; background:#DEB87A; z-index:2;
+    }
+    .window-bar-h {
+      position:absolute; top:50%; left:0;
+      width:100%; height:3px; background:#DEB87A; z-index:2;
+    }
+    .window-sill {
+      width:160px; height:12px; background:#DEB87A;
+      border-radius:4px; margin:0 auto;
+    }
+    .window-cat-container {
+      position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
+      z-index:3;
+    }
+    .wc-head {
+      width:58px; height:52px; border-radius:50% 50% 40% 40%;
+      position:relative; margin:0 auto;
+      animation:wcBob 4s ease-in-out infinite;
+    }
+    @keyframes wcBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+    .wc-ear {
+      position:absolute; top:-14px;
+      width:0; height:0;
+      border-left:10px solid transparent;
+      border-right:10px solid transparent;
+      border-bottom-width:17px; border-bottom-style:solid;
+    }
+    .wc-ear::after {
+      content:''; position:absolute; top:4px; left:-5px;
+      width:0; height:0;
+      border-left:5px solid transparent;
+      border-right:5px solid transparent;
+      border-bottom:10px solid #FFB8C6;
+    }
+    .wc-ear-l{left:5px;transform:rotate(-8deg)} .wc-ear-r{right:5px;transform:rotate(8deg)}
+    .wc-eye {
+      position:absolute; top:16px;
+      width:10px; height:10px;
+      border-radius:50%;
+      animation:blink 5s ease-in-out infinite;
+    }
+    .wc-eye::before { content:''; position:absolute; top:2px;left:2px; width:3px;height:3px; background:#fff; border-radius:50%; }
+    .wc-eye-l{left:10px} .wc-eye-r{right:10px}
+    .window-label { font-size:0.78rem; color:var(--text-light); margin-top:0.5rem; font-weight:700; }
+
+    /* ── MENU ── */
+    .menu { background:var(--cream); }
+    .menu-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+      gap:1.5rem; max-width:1000px; margin:0 auto;
+    }
+    .menu-card {
+      background:var(--warm-white); border-radius:20px; padding:1.5rem;
+      text-align:center;
+      border:2px solid rgba(255,179,71,0.22);
+      box-shadow:0 4px 16px rgba(196,124,90,0.07);
+      transition:transform 0.3s;
+    }
+    .menu-card:hover{transform:scale(1.04) rotate(1deg)}
+    .menu-icon{font-size:2.4rem;margin-bottom:0.5rem}
+    .menu-card h3{color:var(--caramel);font-size:1rem;margin-bottom:0.3rem}
+    .menu-card p{font-size:0.83rem;color:var(--text-light);line-height:1.5}
+    .menu-price{color:var(--apricot);font-weight:800;font-size:1rem;margin-top:0.6rem}
+
+    /* ── ABOUT / COZY ── */
+    .cozy { background:linear-gradient(135deg,#FFE8D6,#FFF0E0 50%,#FFE0D0); }
+    .cozy-inner {
+      max-width:880px; margin:0 auto;
+      display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center;
+    }
+    @media(max-width:640px){.cozy-inner{grid-template-columns:1fr}}
+    .cozy-text h2{font-family:'Pacifico',cursive;font-size:2rem;color:var(--caramel);margin-bottom:1rem}
+    .cozy-text p{color:var(--text-light);line-height:1.8;margin-bottom:0.9rem;font-size:1rem}
+    .cozy-cats{display:flex;flex-wrap:wrap;gap:1.2rem;justify-content:center}
+
+    /* ── FOOTER ── */
+    footer {
+      background:linear-gradient(135deg,#F5E6D3,#FFE0CC);
+      text-align:center; padding:3rem 1.5rem;
+      color:var(--text-light); position:relative; z-index:1;
+    }
+    .footer-emoji-row{display:flex;justify-content:center;gap:0.7rem;font-size:2rem;margin-bottom:1rem;flex-wrap:wrap}
+    .fe{animation:feBounce 2s ease-in-out infinite}
+    .fe:nth-child(2){animation-delay:.15s} .fe:nth-child(3){animation-delay:.30s}
+    .fe:nth-child(4){animation-delay:.45s} .fe:nth-child(5){animation-delay:.60s}
+    .fe:nth-child(6){animation-delay:.75s} .fe:nth-child(7){animation-delay:.90s}
+    @keyframes feBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    footer p{font-size:0.9rem}
+    footer .love{color:var(--caramel);font-weight:800}
+
+    /* ── SCROLL REVEAL ── */
+    .reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s,transform 0.7s}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+  </style>
+</head>
+<body>
+
+<!-- FLOATING PAWS -->
+<div class="paw-bg" id="pawBg"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">🐱 CozyCat Café</a>
+  <ul class="nav-links">
+    <li><a href="#gallery">Our Cats</a></li>
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#cozy">About</a></li>
+    <li><a href="#windows">Visit</a></li>
+  </ul>
+  <span class="nav-cat">😺</span>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+
+  <!-- big left cat -->
+  <div class="big-side-cat left">
+    <div class="cat-wrap c-orange cat-lg">
+      <div class="cat-head">
+        <div class="ear ear-l"></div><div class="ear ear-r"></div>
+        <div class="eye eye-l"></div><div class="eye eye-r"></div>
+        <div class="cat-nose"></div>
+        <div class="cat-mouth-l"></div><div class="cat-mouth-r"></div>
+        <div class="w wl1"></div><div class="w wl2"></div><div class="w wl3"></div>
+        <div class="w wr1"></div><div class="w wr2"></div><div class="w wr3"></div>
+      </div>
+      <div class="cat-torso">
+        <svg class="tail-svg tail-slow" width="55" height="95" viewBox="0 0 55 95">
+          <path class="tail-path" d="M 8 90 C 10 65, 48 60, 42 32 C 36 8, 12 6, 22 0" stroke-width="11" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="cat-paws"><div class="paw-pad"></div><div class="paw-pad"></div></div>
+    </div>
+  </div>
+
+  <!-- big right cat -->
+  <div class="big-side-cat right">
+    <div class="cat-wrap c-gray cat-lg">
+      <div class="cat-head">
+        <div class="ear ear-l"></div><div class="ear ear-r"></div>
+        <div class="eye eye-l" style="animation-delay:0.8s"></div>
+        <div class="eye eye-r" style="animation-delay:1.4s"></div>
+        <div class="cat-nose"></div>
+        <div class="cat-mouth-l"></div><div class="cat-mouth-r"></div>
+        <div class="w wl1"></div><div class="w wl2"></div><div class="w wl3"></div>
+        <div class="w wr1"></div><div class="w wr2"></div><div class="w wr3"></div>
+      </div>
+      <div class="cat-torso">
+        <svg class="tail-svg tail-late" width="55" height="95" viewBox="0 0 55 95">
+          <path class="tail-path" d="M 8 90 C 10 65, 48 60, 42 32 C 36 8, 12 6, 22 0" stroke-width="11" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="cat-paws"><div class="paw-pad"></div><div class="paw-pad"></div></div>
+    </div>
+  </div>
+
+  <h1 class="hero-title">Welcome to<br/>CozyCat Café ☕</h1>
+  <p class="hero-sub">A warm, purr-fect place where coffee meets cats. Come in, stay a while, and let our fluffy friends melt your heart. 🐾</p>
+  <a href="#gallery" class="hero-btn">Meet Our Cats 🐾</a>
+
+  <!-- hero row of cats -->
+  <div class="hero-cat-row" id="heroCats"></div>
+</section>
+
+<!-- ═══ WALKING STRIP ═══ -->
+<div class="walk-strip">
+  <h3>🐾 Our cats love to roam! 🐾</h3>
+  <div class="walk-track" id="walkTrack"></div>
+</div>
+
+<!-- ═══ GALLERY ═══ -->
+<section class="gallery" id="gallery">
+  <h2 class="section-title reveal">Meet Our Residents 🐱</h2>
+  <p class="section-sub reveal">Every kitty has a unique personality — come find your soulmate! 💕</p>
+  <div class="gallery-grid" id="galleryGrid"></div>
+</section>
+
+<!-- ═══ WINDOWS ═══ -->
+<section class="windows-section" id="windows">
+  <h2 class="section-title reveal">Window Watchers 🪟</h2>
+  <p class="section-sub reveal">Spot our cats keeping an eye on the street — judging passers-by with quiet dignity.</p>
+  <div class="windows-row reveal" id="windowsRow"></div>
+</section>
+
+<!-- ═══ MENU ═══ -->
+<section class="menu" id="menu">
+  <h2 class="section-title reveal">Our Cozy Menu ☕</h2>
+  <p class="section-sub reveal">Sip and snuggle — every bite is crafted with love and cat energy 🐾</p>
+  <div class="menu-grid">
+    <div class="menu-card reveal"><div class="menu-icon">☕</div><h3>Purrfect Latte</h3><p>Creamy oat milk latte with cat paw latte art — too cute to drink (but you will)</p><div class="menu-price">$5.50</div></div>
+    <div class="menu-card reveal" style="transition-delay:.08s"><div class="menu-icon">🍰</div><h3>Cat Paw Cake</h3><p>Vanilla sponge with rose buttercream shaped into adorable little paw pads</p><div class="menu-price">$6.00</div></div>
+    <div class="menu-card reveal" style="transition-delay:.16s"><div class="menu-icon">🧁</div><h3>Whisker Muffin</h3><p>Blueberry muffin decorated with edible whiskers and a tiny fondant nose</p><div class="menu-price">$4.00</div></div>
+    <div class="menu-card reveal" style="transition-delay:.24s"><div class="menu-icon">🍵</div><h3>Neko Matcha</h3><p>Ceremonial matcha with steamed milk and a cat silhouette stencilled on top</p><div class="menu-price">$5.00</div></div>
+    <div class="menu-card reveal" style="transition-delay:.32s"><div class="menu-icon">🥐</div><h3>Croissant Kitty</h3><p>Buttery croissant baked cat-shaped, served with berry jam and clotted cream</p><div class="menu-price">$4.50</div></div>
+    <div class="menu-card reveal" style="transition-delay:.40s"><div class="menu-icon">🍫</div><h3>Midnight Cocoa</h3><p>Rich dark hot chocolate with whipped cream and an edible Luna on top</p><div class="menu-price">$5.50</div></div>
+    <div class="menu-card reveal" style="transition-delay:.48s"><div class="menu-icon">🍓</div><h3>Strawberry Pawfait</h3><p>Layered strawberry yoghurt parfait with granola — healthy and cat-approved</p><div class="menu-price">$7.00</div></div>
+    <div class="menu-card reveal" style="transition-delay:.56s"><div class="menu-icon">🧃</div><h3>Citrus Purr</h3><p>Fresh-squeezed orange juice with ginger — energise like a morning kitten</p><div class="menu-price">$4.00</div></div>
+  </div>
+</section>
+
+<!-- ═══ COZY ABOUT ═══ -->
+<section class="cozy" id="cozy">
+  <div class="cozy-inner">
+    <div class="cozy-text">
+      <h2>Our Little Story 🐾</h2>
+      <p>CozyCat Café was born from a simple dream: a place where every guest feels the warmth of home, surrounded by the gentle purring of happy cats.</p>
+      <p>We opened in 2018 with just three rescue cats — Mango, Ash, and the legendary Noodle. Today we have six fluffy residents who run the show (we just work for them).</p>
+      <p>All our cats are rescues. When you visit, you help support their care, vet visits, and the occasional dramatic 3am zoomies. 💕</p>
+    </div>
+    <div class="cozy-cats">
+      <!-- sleeping noodle -->
+      <div class="sleep-wrap">
+        <div class="sleep-head">
+          <div class="sleep-ear sleep-ear-l"></div>
+          <div class="sleep-ear sleep-ear-r"></div>
+          <div class="sleep-eyelid sleep-eyelid-l"></div>
+          <div class="sleep-eyelid sleep-eyelid-r"></div>
+          <span class="z-bubble z1">z</span>
+          <span class="z-bubble z2">z</span>
+          <span class="z-bubble z3">z</span>
+        </div>
+        <div class="sleep-body">
+          <svg class="sleep-tail-svg" width="45" height="55" viewBox="0 0 45 55">
+            <path d="M 5 50 C 8 35, 40 32, 35 14 C 30 2, 12 2, 18 0" stroke="#E08040" stroke-width="9" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <!-- biscuit standing -->
+      <div class="cat-wrap c-cream" style="margin-top:10px">
+        <div class="cat-head">
+          <div class="ear ear-l"></div><div class="ear ear-r"></div>
+          <div class="eye eye-l" style="animation-delay:0.6s"></div>
+          <div class="eye eye-r" style="animation-delay:1.3s"></div>
+          <div class="cat-nose"></div>
+          <div class="cat-mouth-l"></div><div class="cat-mouth-r"></div>
+          <div class="w wl1"></div><div class="w wl2"></div><div class="w wl3"></div>
+          <div class="w wr1"></div><div class="w wr2"></div><div class="w wr3"></div>
+        </div>
+        <div class="cat-torso">
+          <svg class="tail-svg tail-slow tail-late2" width="55" height="95" viewBox="0 0 55 95">
+            <path class="tail-path" d="M 8 90 C 10 65, 48 60, 42 32 C 36 8, 12 6, 22 0" stroke-width="11" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="cat-paws"><div class="paw-pad"></div><div class="paw-pad"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-emoji-row">
+    <span class="fe">🐱</span><span class="fe">😸</span><span class="fe">🐾</span>
+    <span class="fe">😺</span><span class="fe">🐈</span><span class="fe">💕</span>
+    <span class="fe">☕</span>
+  </div>
+  <p>Made with <span class="love">♥</span> and lots of purring · CozyCat Café © 2024</p>
+  <p style="margin-top:0.4rem;font-size:0.8rem">Open daily 9am – 9pm · 42 Whisker Lane · 🐾🐾🐾</p>
+</footer>
+
+<!-- ─────────────────────────────────────────────
+     JAVASCRIPT — generates cats & walk parade
+───────────────────────────────────────────── -->
+<script>
+/* cat data */
+const CATS = [
+  { id:'orange', cls:'c-orange', eyeDelay:[0,0.5],  tailCls:'',           name:'Mango 🍊',  bio:'The café\'s biggest foodie. Always first in line when treats come out. Loves belly rubs and sunny spots.' },
+  { id:'gray',   cls:'c-gray',   eyeDelay:[0.4,1.1], tailCls:'tail-late',  name:'Ash 🩶',    bio:'Cool, calm, collected. Ash is the café philosopher — always gazing out the window with deep thoughts.' },
+  { id:'cream',  cls:'c-cream',  eyeDelay:[1.5,0.3], tailCls:'tail-slow',  name:'Biscuit 🍪',bio:'Sweet as her name. Biscuit will sit on your laptop, your book, your coffee — anywhere you need to focus.' },
+  { id:'black',  cls:'c-black',  eyeDelay:[0.6,1.8], tailCls:'tail-late2', name:'Luna 🌙',   bio:'Mysterious and magical. Luna only approaches guests she truly likes — so if she chooses you, you are very special.' },
+  { id:'pink',   cls:'c-pink',   eyeDelay:[0.9,0.2], tailCls:'tail-fast',  name:'Rosie 🌸',  bio:'The café\'s sweetheart. Rosie loves cuddles, chin scratches, and watching the barista make latte art.' },
+  { id:'toffee', cls:'c-toffee', eyeDelay:[1.2,0.7], tailCls:'tail-slow tail-late', name:'Caramel 🍮', bio:'Big fluffy stripes and an even bigger personality. Caramel thinks he is the café owner, and he\'s not wrong.' },
+];
+
+const TAIL_SVG = `<svg class="tail-svg TCLASS" width="55" height="95" viewBox="0 0 55 95">
+  <path class="tail-path" d="M 8 90 C 10 65, 48 60, 42 32 C 36 8, 12 6, 22 0" stroke-width="11" fill="none" stroke-linecap="round"/>
+</svg>`;
+
+function makeCat(cat, extraClass='', scaleClass='') {
+  const [d1,d2] = cat.eyeDelay;
+  const tail = TAIL_SVG.replace('TCLASS', cat.tailCls);
+  return `<div class="cat-wrap ${cat.cls} ${scaleClass}">
+    <div class="cat-head">
+      <div class="ear ear-l"></div><div class="ear ear-r"></div>
+      <div class="eye eye-l" style="animation-delay:${d1}s"></div>
+      <div class="eye eye-r" style="animation-delay:${d2}s"></div>
+      <div class="cat-nose"></div>
+      <div class="cat-mouth-l"></div><div class="cat-mouth-r"></div>
+      <div class="w wl1"></div><div class="w wl2"></div><div class="w wl3"></div>
+      <div class="w wr1"></div><div class="w wr2"></div><div class="w wr3"></div>
+    </div>
+    <div class="cat-torso">${tail}</div>
+    <div class="cat-paws"><div class="paw-pad"></div><div class="paw-pad"></div></div>
+    <div class="cat-name">${cat.name}</div>
+  </div>`;
+}
+
+/* ── Hero row ── */
+document.getElementById('heroCats').innerHTML = CATS.map(c => makeCat(c)).join('');
+
+/* ── Gallery ── */
+const galleryEl = document.getElementById('galleryGrid');
+/* first card is sleeping Noodle */
+galleryEl.innerHTML = `
+  <div class="gallery-card reveal">
+    <div class="sleep-wrap">
+      <div class="sleep-head">
+        <div class="sleep-ear sleep-ear-l"></div>
+        <div class="sleep-ear sleep-ear-r"></div>
+        <div class="sleep-eyelid sleep-eyelid-l"></div>
+        <div class="sleep-eyelid sleep-eyelid-r"></div>
+        <span class="z-bubble z1">z</span>
+        <span class="z-bubble z2">z</span>
+        <span class="z-bubble z3">z</span>
+      </div>
+      <div class="sleep-body">
+        <svg class="sleep-tail-svg" width="45" height="55" viewBox="0 0 45 55">
+          <path d="M 5 50 C 8 35, 40 32, 35 14 C 30 2, 12 2, 18 0" stroke="#E08040" stroke-width="9" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <h3>Noodle</h3>
+    <p>Champion sleeper. Has claimed every soft surface in the café. Professional dream explorer and cozy ambassador.</p>
+  </div>` +
+  CATS.map((c, i) => `
+  <div class="gallery-card reveal" style="transition-delay:${(i+1)*0.08}s">
+    ${makeCat(c, '', 'cat-sm')}
+    <h3 style="margin-top:0.5rem">${c.name}</h3>
+    <p>${c.bio}</p>
+  </div>`).join('');
+
+/* ── Walking parade ── */
+const WALK_CATS = [
+  {cls:'wc-orange', dur:'9s',  delay:'0s',   bot:'18px', sc:1},
+  {cls:'wc-gray',   dur:'11s', delay:'-3.5s',bot:'28px', sc:0.8},
+  {cls:'wc-cream',  dur:'8s',  delay:'-7s',  bot:'12px', sc:0.9},
+  {cls:'wc-black',  dur:'13s', delay:'-5s',  bot:'24px', sc:1.1},
+  {cls:'wc-pink',   dur:'10s', delay:'-1.8s',bot:'14px', sc:0.85},
+  {cls:'wc-orange', dur:'7.5s',delay:'-9s',  bot:'6px',  sc:0.72},
+  {cls:'wc-toffee', dur:'12s', delay:'-11s', bot:'34px', sc:1.0},
+  {cls:'wc-gray',   dur:'9.5s',delay:'-4.5s',bot:'20px', sc:0.95},
+];
+const track = document.getElementById('walkTrack');
+WALK_CATS.forEach(w => {
+  const div = document.createElement('div');
+  div.className = `walker ${w.cls}`;
+  div.style.cssText = `animation-duration:${w.dur};animation-delay:${w.delay};bottom:${w.bot};transform:scale(${w.sc});transform-origin:bottom center`;
+  div.innerHTML = `
+    <div class="wcat-head">
+      <div class="wcat-ear wcat-ear-l"></div>
+      <div class="wcat-ear wcat-ear-r"></div>
+      <div class="weye wl"></div>
+      <div class="weye wr"></div>
+    </div>
+    <div class="wcat-body">
+      <svg class="w-tail-svg" width="38" height="60" viewBox="0 0 38 60">
+        <path class="wtail" d="M 5 55 C 6 40, 32 36, 28 18 C 24 4, 8 3, 14 0" stroke-width="8" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="wlegs">
+      <div class="wleg"></div><div class="wleg"></div>
+      <div class="wleg"></div><div class="wleg"></div>
+    </div>`;
+  track.appendChild(div);
+});
+
+/* ── Windows ── */
+const WIN_CATS = [
+  { headBg:'#F4A460', earCol:'#F4A460', eyeCol:'#3A2A1A', glassBg:'linear-gradient(135deg,#C8DEFF,#E0EEFF,#F4F8FF)', label:'Mango watching pigeons 👀' },
+  { headBg:'#C0B8B8', earCol:'#C0B8B8', eyeCol:'#3A6A5A', glassBg:'linear-gradient(135deg,#F0E8E0,#E8D8C8)', label:'Ash in deep thought 🌤' },
+  { headBg:'#38303E', earCol:'#38303E', eyeCol:'#58C888', eyeGlow:'0 0 8px #58C888', glassBg:'linear-gradient(135deg,#1A1228,#2A1840,#1E1430)', label:'Luna stargazing 🌙✨', night:true },
+  { headBg:'#F0D9A8', earCol:'#F0D9A8', eyeCol:'#2A5A3A', glassBg:'linear-gradient(135deg,#FFF8F0,#FFE8D8)', label:'Biscuit napping 💤', sleeping:true },
+];
+const winRow = document.getElementById('windowsRow');
+WIN_CATS.forEach(w => {
+  const stars = w.night ? `
+    <span style="position:absolute;top:14%;left:22%;font-size:0.45rem;color:#fff;animation:wink 2s infinite">★</span>
+    <span style="position:absolute;top:28%;left:65%;font-size:0.38rem;color:#fff;animation:wink 2.6s 0.4s infinite">★</span>
+    <span style="position:absolute;top:8%;left:72%;font-size:0.55rem;color:#fff;animation:wink 3s 0.2s infinite">★</span>
+    <span style="position:absolute;top:48%;left:12%;font-size:0.38rem;color:#fff;animation:wink 1.9s 0.7s infinite">★</span>` : '';
+  const catInner = w.sleeping ? `
+    <div style="width:52px;height:22px;background:${w.headBg};border-radius:50%;position:relative">
+      <div style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:36px;height:30px;background:${w.headBg};border-radius:50% 50% 40% 40%">
+        <div style="position:absolute;top:12px;left:5px;width:10px;height:3px;background:#5C3D2E;border-radius:3px"></div>
+        <div style="position:absolute;top:12px;right:5px;width:10px;height:3px;background:#5C3D2E;border-radius:3px"></div>
+      </div>
+    </div>` : `
+    <div class="wc-head" style="background:${w.headBg}">
+      <div class="wc-ear wc-ear-l" style="border-bottom-color:${w.earCol}"></div>
+      <div class="wc-ear wc-ear-r" style="border-bottom-color:${w.earCol}"></div>
+      <div class="wc-eye wc-eye-l" style="background:${w.eyeCol};${w.eyeGlow?'box-shadow:'+w.eyeGlow:''}"></div>
+      <div class="wc-eye wc-eye-r" style="background:${w.eyeCol};${w.eyeGlow?'box-shadow:'+w.eyeGlow:''};animation-delay:0.7s"></div>
+    </div>`;
+  winRow.innerHTML += `
+    <div class="window-item">
+      <div class="window-frame">
+        <div class="window-glass" style="background:${w.glassBg}">
+          <div class="window-bar-v"></div>
+          <div class="window-bar-h"></div>
+          ${stars}
+          <div class="window-cat-container">${catInner}</div>
+        </div>
+        <div class="window-sill"></div>
+      </div>
+      <div class="window-label">${w.label}</div>
+    </div>`;
+});
+
+/* ── Floating paws background ── */
+const pawBg = document.getElementById('pawBg');
+['🐾','🐾','🐾','🐱','😺','💕','✨','🐈'].forEach((em, i) => {
+  for (let j = 0; j < 3; j++) {
+    const s = document.createElement('span');
+    s.className = 'paw';
+    s.textContent = em;
+    s.style.left = (Math.random()*100) + '%';
+    s.style.animationDuration = (12 + Math.random()*18) + 's';
+    s.style.animationDelay    = (Math.random()*22) + 's';
+    s.style.fontSize          = (0.75 + Math.random()*1.1) + 'rem';
+    pawBg.appendChild(s);
+  }
+});
+
+/* ── Scroll reveal ── */
+const io = new IntersectionObserver(entries =>
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+  { threshold: 0.12 }
+);
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ── Heart burst on gallery card click ── */
+document.addEventListener('click', e => {
+  const card = e.target.closest('.gallery-card');
+  if (!card) return;
+  for (let i = 0; i < 10; i++) {
+    const h = document.createElement('span');
+    h.textContent = ['💕','❤️','💗','✨','🐾','😻'][Math.floor(Math.random()*6)];
+    h.style.cssText = `
+      position:fixed;left:${e.clientX+(Math.random()-.5)*70}px;top:${e.clientY}px;
+      font-size:${0.8+Math.random()*0.9}rem;pointer-events:none;z-index:9999;
+      animation:heartBurst 1.3s ease-out forwards;animation-delay:${Math.random()*0.25}s;`;
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 1600);
+  }
+});
+</script>
+
+<style>
+@keyframes heartBurst {
+  0%   { transform:translateY(0) scale(0.4); opacity:1; }
+  100% { transform:translateY(-90px) scale(1.3); opacity:0; }
+}
+</style>
+</body>
+</html>
